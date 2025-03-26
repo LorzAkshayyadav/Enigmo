@@ -1,0 +1,166 @@
+
+.Tool-Bar {
+  display: flex;
+  justify-content: space-around; 
+  align-items: center;
+  height: 7vh;
+  width: 100vw;
+  background-color: rgb(161, 139, 181);
+  position: relative;
+}
+
+.graph1,
+.graph {
+  width: 5cm;
+  background-origin: padding-box;
+  background-color: rgb(160, 157, 215);
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  transition: background 0.3s ease-in-out;
+}
+
+.graph1 {
+  margin-right: 10px;
+}
+
+.graph1:hover,
+.graph:hover {
+  background-color: rgb(18, 70, 115);
+  color: white;
+}
+.App {
+  width: 80vw;
+  height: 100vh;
+  background-color: rgb(245, 248, 246);
+  display: flex;
+  flex-direction: column;
+  justify-content: right;
+}
+
+canvas {
+  transition: all 0.3s ease-in-out;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row-reverse;
+  padding-top: 5px;
+  padding-right: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Scrollable Container */
+.scrollable-container {
+  width: 300px;
+  height: 200px;
+  overflow-y: scroll;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  height: 600px; /* Demonstrating scrolling */
+}
+
+/* Drop-Up Menu */
+.dropdown-menu {
+  position: absolute;
+  bottom: 8vh; /* Positions the menu above the toolbar */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  width: 220px; /* Fixed width */
+  max-height: 300px; /* Limits dropdown height */
+  overflow-y: auto; /* Enables vertical scrolling */
+  padding: 8px;
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Dropdown Items */
+.dropdown-item {
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Hover Effect */
+.dropdown-item:hover {
+  background-color: rgb(25, 94, 155);
+  color: white;
+  border-radius: 5px;
+}
+
+/* Scrollbar Styling */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
