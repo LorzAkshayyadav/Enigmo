@@ -32,30 +32,70 @@
   color: white;
 }
 .App {
-  width: 80vw;
+  width: 100vw;
   height: 100vh;
   background-color: rgb(245, 248, 246);
   display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+.wer1 {
+  background-color: rgb(245, 248, 246);
+  display: flex;
+  width: 80%;
   flex-direction: column;
-  justify-content: right;
+  justify-content: left;
+}
+.wer1 :first-child{
+  margin: 0;
+}
+.wer1 :last-child {
+  height: 90%;
+}
+
+.wer {
+  background-color: #4CAF50;
+  width: 20%;
+  height: 100%;
+  border-left: 2px solid rgb(132, 127, 127);
+  display:flex;
+  flex-direction: column;
+}
+
+.wer > div:first-child {
+  flex: 1;
+  height: 50%;
+  background-color: #ccc;
+  border-bottom: solid black;
+  border-top: solid black;
+}
+.wer > div:first-child >h2{
+  margin-top: 0;
+  background-color: rgb(137, 146, 154);
+}
+
+.wer > div:last-child {
+  flex: 1;  
+  background-color: #ccc;
+}
+.wer > div:last-child >h2{
+  margin-top: 0;
+  background-color: rgb(137, 146, 154);
 }
 
 canvas {
   transition: all 0.3s ease-in-out;
 }
-
 .heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display:flex;
   flex-direction: row-reverse;
-  padding-top: 5px;
-  padding-right: 10px;
+  width: 100%;
+  gap: 10px;
+  background-color: #ccc;
 }
 
 .switch {
   position: relative;
-  display: inline-block;
   width: 40px;
   height: 20px;
 }
@@ -73,7 +113,7 @@ canvas {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #faf9f9;
   transition: 0.4s;
   border-radius: 20px;
 }
@@ -85,11 +125,13 @@ canvas {
   width: 14px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: rgb(31, 30, 30);
   transition: 0.4s;
   border-radius: 50%;
 }
-
+.bold {
+ font-size: large;
+}
 input:checked + .slider {
   background-color: #4CAF50;
 }
@@ -97,8 +139,6 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(20px);
 }
-
-/* Scrollable Container */
 .scrollable-container {
   width: 300px;
   height: 200px;
@@ -109,13 +149,12 @@ input:checked + .slider:before {
 }
 
 .content {
-  height: 600px; /* Demonstrating scrolling */
+  height: 600px; 
 }
 
-/* Drop-Up Menu */
 .dropdown-menu {
   position: absolute;
-  bottom: 8vh; /* Positions the menu above the toolbar */
+  bottom: 8vh; 
   left: 50%;
   transform: translateX(-50%);
   background-color: white;
