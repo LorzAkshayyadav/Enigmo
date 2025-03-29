@@ -4,13 +4,18 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import toast from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+import RealTimeChart from "./RealTimeChart"; 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedActuator, setSelectedActuator] = useState(null);
   const dropdownRef = useRef(null);
-
-  const instruments = ["Scissor", "Grasper", "Holder", "Disector", "Teneculum"];
+  const ws = useRef(null);
+  const instruments = ["Scissor", "Grasper", "Holder", "Dissector", "Teneculum"];
+  const openPlotApp = () => {
+    window.open("http://localhost:3001", "_blank");
+  };
+  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -23,29 +28,45 @@ function App() {
     };
   }, []);
 
-
   const [expandedActuators, setExpandedActuators] = useState({});
   const [expandAll, setExpandAll] = useState(false);
+  const [Actuators, setActuators] = useState([]);  // Initialize as an empty array
 
-  const [actuators, setActuators] = useState([
-    { id: 1, jointAngle: 0, torque: 0 },
-    { id: 2, jointAngle: 0, torque: 0 },
-    { id: 3, jointAngle: 0, torque: 0 },
-    { id: 4, jointAngle: 0, torque: 0 },
-  ]);
-
-  // Update actuator data every second
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActuators((prev) =>
-        prev.map((actuator) => ({
-          ...actuator,
-          jointAngle: Math.random() * 180, // 0-180 degrees
-          torque: Math.random() * 10, // 0-10 Nm
-        }))
-      );
-    }, 1000);
-    return () => clearInterval(interval);
+    const connectWebSocket = () => {
+      if (ws.current) return;
+
+      ws.current = new WebSocket("ws://localhost:5002");
+
+      ws.current.onopen = () => {
+        console.log("Connected to WebSocket server");
+      };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("WebSocket Data Received:", data);
+        if (data.type === "initialData") {
+          setActuators(Object.values(data.Actuators || {}));  // Convert object to array
+        }
+
+        if (data.type === "update") {
+          setActuators((prev) => {
+            const updatedActuators = { ...prev };
+            Object.values(data.Actuators || {}).forEach((actuator) => {
+              updatedActuators[actuator.id] = actuator;
+            });
+            return Object.values(updatedActuators);
+          });
+        }
+      };
+
+      ws.current.onclose = () => {
+        console.log("WebSocket Disconnected. Reconnecting in 3 seconds...");
+        setTimeout(connectWebSocket, 3000);
+      };
+    };
+
+    connectWebSocket();
   }, []);
 
   // Toggle individual actuator
@@ -61,7 +82,7 @@ function App() {
     const newState = !expandAll;
     setExpandAll(newState);
     const newExpandedState = {};
-    actuators.forEach((actuator) => {
+    Actuators.forEach((actuator) => {
       newExpandedState[actuator.id] = newState;
     });
     setExpandedActuators(newExpandedState);
@@ -69,6 +90,7 @@ function App() {
 
   return (
     <>
+      <Toaster />
       <div className="Tool-Bar">
         <button className="graph1">Simulation Mode</button>
         <button className="graph1">Hardware Mode</button>
@@ -104,12 +126,13 @@ function App() {
         <button className="graph" onClick={toggleAllActuators}>
           {expandAll ? "Collapse All Actuators" : "Show All Actuators"}
         </button>
-        <button className="graph">Plot Graph</button>
+        <button className="graph" onClick={openPlotApp}>Plot Graph</button>
+
       </div>
 
       <div className="App">
         <div className="wer1">
-        <div>
+          <div>
             <span className="heading">
               <label className="switch">
                 <input type="checkbox" />
@@ -126,50 +149,52 @@ function App() {
             </Canvas>
           </div>
         </div>
+
         <div className="wer">
           <div>
-          <h2>Actuators:</h2>
-          <div className="actuator-list">
-            {actuators.map((actuator) => (
-              <div key={actuator.id} className="actuator-row">
-
-                <button
-                  className="actuator-btn"
-                  onClick={() => toggleActuator(actuator.id)}
-                >
-                  Actuator {actuator.id} ▼
-                </button>
-                <AnimatePresence>
-                  {expandedActuators[actuator.id] && (
-                    <motion.div
-                      className="actuator-details"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
+            <h2>Actuators:</h2>
+            <div className="actuator-list">
+              {Actuators.length > 0 ? (
+                Actuators.map((actuator) => (
+                  <div key={actuator.id} className="actuator-row">
+                    <button
+                      className="actuator-btn"
+                      onClick={() => toggleActuator(actuator.id)}
                     >
-                      
-                      <p><strong>Joint Angle:</strong> {actuator.jointAngle.toFixed(2)}°</p>
-                      <p><strong>Torque:</strong> {actuator.torque.toFixed(2)} Nm</p>
-                     
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
+                      {actuator.name} ▼
+                    </button>
+                    <AnimatePresence>
+                      {expandedActuators[actuator.id] && (
+                        <motion.div
+                          className="actuator-details"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <p><strong>Joint Angle:</strong> {actuator.readData?.["Joint Angle"] ?? "N/A"}°</p>
+                          <p><strong>Torque:</strong> {actuator.readData?.["Actual Torque"] ?? "N/A"} Nm</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))
+              ) : (
+                <p>No Actuators Available</p>
+              )}
+            </div>
           </div>
-          </div>
+
           <div>
-          <h2>Instrument</h2>
-          <div className="data-box">
-      <p><strong>Pitch:</strong> {1}°</p>
-      <p><strong>Pinch:</strong> {2}°</p>
-      <p><strong>Yaw:</strong> {3}°</p>
-      <p><strong>Roll: </strong> {4}°</p>
-    </div>
+            <h2>Instrument</h2>
+            <div className="data-box">
+              <p><strong>Pitch:</strong> 1°</p>
+              <p><strong>Pinch:</strong> 2°</p>
+              <p><strong>Yaw:</strong> 3°</p>
+              <p><strong>Roll:</strong> 4°</p>
+            </div>
           </div>
         </div>
-        
       </div>
     </>
   );
