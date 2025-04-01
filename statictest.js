@@ -6,8 +6,13 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-let actualPosition = 0;
 let Actuators = {};
+let Instruments = {
+  Pitch: 10,
+  Yaw: 20,
+  Roll: 30,
+  Pinch: 4,
+};
 
 // Initialize Actuators
 for (let i = 1; i <= 4; i++) {
@@ -17,7 +22,7 @@ for (let i = 1; i <= 4; i++) {
     status: "Active",
     readData: {
       "Actual Position": i,
-      "Actual Velocity":i,
+      "Actual Velocity": i,
       "Joint Angle": i,
       "Actual Torque": i,
     },
@@ -30,47 +35,58 @@ for (let i = 1; i <= 4; i++) {
   };
 }
 
-// ✅ Update Data Every Second and Broadcast to Clients
+// ✅ Update Data Every 10ms and Broadcast to Clients
 setInterval(() => {
-  actualPosition = Math.random() * 100; // Generate new value
+  let actualPosition = Math.random() * 100;
 
-  // Update Actuators' readData with new values
   for (let i = 1; i <= 4; i++) {
-    Actuators[i].readData["Actual Position"] = actualPosition;
-    Actuators[i].readData["Actual Velocity"] = actualPosition;
-    Actuators[i].readData["Joint Angle"] = actualPosition;
-    Actuators[i].readData["Actual Torque"] = actualPosition;
+    Actuators[i].readData["Actual Position"] = actualPosition.toFixed(2);
+    Actuators[i].readData["Actual Velocity"] = actualPosition.toFixed(2);
+    Actuators[i].readData["Joint Angle"] = actualPosition.toFixed(2);
+    Actuators[i].readData["Actual Torque"] = actualPosition.toFixed(2);
+    Instruments["Pinch"]=actualPosition.toFixed(2);
+    Instruments["Pitch"]=actualPosition.toFixed(2);
+    Instruments["Roll"]=actualPosition.toFixed(2);
+    Instruments["Yaw"]=actualPosition.toFixed(2);
   }
-  const dataToSend = JSON.stringify({ type: "update", Actuators });
+
+  const dataToSend = JSON.stringify({ type: "update", Actuators, Instruments });
   wss.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {
       client.send(dataToSend);
     }
   });
-}, 10);
+}, 1000);
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
-  // Send initial actuator data
-  ws.send(JSON.stringify({ type: "initialData", Actuators }));
+  // Send initial data
+  ws.send(JSON.stringify({ type: "initialData", Actuators, Instruments }));
 
   ws.on("message", (message) => {
-    console.log("Received:", message);
     try {
       const data = JSON.parse(message);
+
       if (data.type === "updateWriteData") {
         const { instrumentId, key, value } = data;
-        Actuators[instrumentId].writeData[key] = value;
-
-        // Broadcast the updated write data to all clients
-        const updateMsg = JSON.stringify({ type: "update", Actuators });
-        wss.clients.forEach((client) => {
-          if (client.readyState === client.OPEN) {
-            client.send(updateMsg);
-          }
-        });
+        if (Actuators[instrumentId]) {
+          Actuators[instrumentId].writeData[key] = value;
+        }
+      } else if (data.type === "updateInstrument") {
+        const { instrumentKey, value } = data;
+        if (Instruments[instrumentKey] !== undefined) {
+          Instruments[instrumentKey] = value;
+        }
       }
+
+      // Broadcast updated data
+      const updateMsg = JSON.stringify({ type: "update", Actuators, Instruments });
+      wss.clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(updateMsg);
+        }
+      });
     } catch (err) {
       console.error("Invalid message format", err);
     }

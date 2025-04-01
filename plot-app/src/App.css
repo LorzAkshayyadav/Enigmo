@@ -2,39 +2,38 @@
   display: flex;
   flex-direction: row;
   height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: smaller;
+  font-family:'Times New Roman', Times, serif
 }
 .cla {
   height:100vh;
   width: 20%;
-  background-color: antiquewhite;
-  justify-content: center;
+  flex-direction: column;
 }
 .cla h2{
-  background-color: aquamarine;
+  background-color:cadetblue;
   margin-top: 0;
-  font-size: small;
+  font-size: 40px;
   padding: 5px;
   padding-top: 10px;
   text-align: center;
-  
+  height:fit-content;
 }
 .button-box button{
-  display: flex;
-  width :19.5vw;
-  margin: 2px;
+  width : 100%;
+  padding-left: 50px;
+  padding-right: 50px;
+  font-size: 40px;
+  padding-top:10px;
+  padding-bottom: 10px;
   justify-content: center;
-  margin: 5px;
-  padding: 10px;
-  cursor: pointer;
-  background-color: lightgray;
-  border: 1px solid white;
-  border-radius: 5px;
+  border: none;
+  background-color: white;
+  border-radius: 8px;
 }
 .button-box button:hover {
   background-color: rgb(58, 58, 70);
-  color: white;
+  z-index: 1;
+  box-shadow: #000 0px 0px 20px;
   cursor: pointer;
 }
 
@@ -47,26 +46,42 @@
 .plot-g h3{
   margin-top: 0;
   margin-bottom: 0;
-  font-size: small;
+  height: fit-content;
+  font-size: 40px;
   padding: 5px;
   padding-top: 10px;
   text-align: center;
-  background-color: coral;
+  background-color: rgb(146, 122, 114);
 }
 .checkbox{
-  background-color: #f6f6f6;
-  padding-left: 10px;
-  font-style: oblique;
+  background-color: #e0dada;
+  font-style: normal;
   font-weight: 700;
+  font-size: 30px;
   padding: 5px;
   text-align: center;
- 
+  padding: 10px;
+  
 }
-.checkbox:hover {
-  text-transform:uppercase
-}
+
 
 .button-box .active {
   background-color: #4caf50;
   color: white;
+}
+.plot-container {
+  width: 80%; /* Adjust width */
+  height: 800px; /* Adjust height */
+  margin-top: 100px;
+  margin-left:150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc; 
+  background-color: #f4f4f4; 
+}
+
+.Plotly {
+  width: 100% !important;
+  height: 100% !important;
 }

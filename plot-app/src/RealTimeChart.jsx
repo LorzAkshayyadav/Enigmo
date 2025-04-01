@@ -56,22 +56,25 @@ const RealTimeChart = ({ instrumentId, ws }) => {
   }, [ws, instrumentId, selectedParameters]);
 
   return (
-    <div>
-      <h3>Real-Time Data Plot</h3>
-      <div className="checkbox">
-        {availableParams.map((param) => (
-          <label key={param} style={{ marginRight: "10px" }}>
-            <input
-              type="checkbox"
-              checked={selectedParameters.includes(param)}
-              onChange={() => handleParameterChange(param)}
-            />
-            {param}
-          </label>
-        ))}
-      </div>
-      {selectedParameters.length > 0 && (
+    <div className="plot-g">
+    <h3>Real-Time Data Plot</h3>
+    <div className="checkbox">
+      {availableParams.map((param) => (
+        <label key={param} style={{ marginRight: "10px" }}>
+          <input
+            type="checkbox"
+            checked={selectedParameters.includes(param)}
+            onChange={() => handleParameterChange(param)}
+          />
+          {param}
+        </label>
+      ))}
+    </div>
+  
+    {selectedParameters.length > 0 && (
+      <div className="plot-container">
         <Plot
+          className="Plotly"
           data={selectedParameters.map((param) => ({
             x: dataPoints.x,
             y: dataPoints.data[param] || [],
@@ -83,11 +86,13 @@ const RealTimeChart = ({ instrumentId, ws }) => {
             title: "Real-Time Data vs Time",
             xaxis: { title: "Time (s)" },
             yaxis: { title: "Values" },
+            autosize: true, // Makes it responsive
           }}
         />
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+  );  
 };
 
 export default RealTimeChart;
