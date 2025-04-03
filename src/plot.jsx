@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import RealTimeChart from "./RealTimeChart";
-
-const App = () => {
+import "./Plot.css";
+const Plot= () => {
   const [ws, setWs] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
   const [instrumentId, setInstrumentId] = useState(null);
@@ -45,7 +45,7 @@ const App = () => {
         <h2>Actuators</h2>
         <div className="button-box">
           {[1, 2, 3, 4].map((id) => (
-            <button
+            <button 
               key={id}
               onClick={() => {
                 setInstrumentId(id);
@@ -60,7 +60,7 @@ const App = () => {
       </div>
 
       <div className="plot">
-        {activeSection && ws && (
+        {ws && (
           <RealTimeChart
             key={instrumentId}
             instrumentId={instrumentId}
@@ -73,4 +73,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Plot;

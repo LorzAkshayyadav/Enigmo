@@ -1,0 +1,133 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.Ui {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  background: rgb(230, 227, 227);
+  flex-wrap: wrap; /* Allow elements to adjust on smaller screens */
+}
+
+.cla {
+  height: 100vh;
+  width: 20%;
+  flex-direction: column;
+}
+
+.cla h2 {
+  background-color: rgb(198, 198, 198);
+  margin-top: 0;
+  font-size: 20px;
+  padding-bottom: 6px;
+  padding-top: 6px;
+  text-align: center;
+  height: fit-content;
+}
+
+.button-box button {
+  width: 100%;
+  padding-left: 50px;
+  padding-right: 50px;
+  font-size: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  justify-content: center;
+  border: none;
+  background-color:rgb(230, 227, 227);
+}
+
+.button-box button:hover {
+  background: linear-gradient(135deg, rgb(90, 89, 89), #787a7a);
+  color: white;
+  z-index: 1;
+  box-shadow: #000 0px 0px 20px;
+  cursor: pointer;
+}
+
+.plot {
+  height: 100vh;
+  width: 80%;
+  font-size: small;
+  border-left: 2px solid rgb(129, 152, 158);
+}
+
+.plot-g h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+  height: fit-content;
+  font-size: 20px;
+  padding: 5px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  text-align: center;
+  background-color: rgb(141, 141, 141);
+}
+
+.checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: #e0dada;
+  font-weight: 100;
+  font-size: 20px;
+  gap:12px;
+  justify-content: center;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding: 6px;
+}
+
+.button-box .active {
+  background-color: rgb(126, 126, 126);
+  color: white;
+}
+
+.plot-container {
+  width: 95%;
+  height: 600px;
+  max-height: 630px;
+  margin-top: 30px;
+  margin-left: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  background-color: #f4f4f4;
+}
+
+/* Make Plotly chart responsive */
+.Plotly {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+  .cla {
+    width: 30%; /* Increase sidebar width */
+  }
+  .plot {
+    width: 70%;
+  }
+}
+
+@media (max-width: 600px) {
+  .Ui {
+    flex-direction: column; /* Stack sidebar and plot */
+  }
+  .cla {
+    width: 100%;
+    height: auto;
+  }
+  .plot {
+    width: 100%;
+    height: auto;
+    border-left: none;
+  }
+  .plot-container {
+    height: 400px; /* Adjust for smaller screens */
+  }
+}

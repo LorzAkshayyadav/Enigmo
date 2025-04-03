@@ -41,7 +41,7 @@ const ActuatorList = ({ actuators }) => {
           </motion.div>
         ))
       ) : (
-        <p>No Actuators Available</p>
+        <p className="no-actuator">No Actuators Available</p>
       )}
     </div>
   </>

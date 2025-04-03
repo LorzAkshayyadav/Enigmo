@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import Plot from "react-plotly.js";
-import "./App.css";
+import "./Plot.css";
 
 const RealTimeChart = ({ instrumentId, ws }) => {
   const [dataPoints, setDataPoints] = useState({ x: [], data: {} });
@@ -28,8 +28,6 @@ const RealTimeChart = ({ instrumentId, ws }) => {
     const handleDataUpdate = (event) => {
       try {
         const data = JSON.parse(event.data);
-
-        // ✅ Ensure correct data structure
         if (data.type === "update" && data.Actuators?.[instrumentId]) {
           const elapsedTime = (Date.now() - startTimeRef.current) / 1000;
 
@@ -58,22 +56,25 @@ const RealTimeChart = ({ instrumentId, ws }) => {
   }, [ws, instrumentId, selectedParameters]);
 
   return (
-    <div>
-      <h3>Real-Time Data Plot</h3>
-      <div className="checkbox">
-        {availableParams.map((param) => (
-          <label key={param} style={{ marginRight: "10px" }}>
-            <input
-              type="checkbox"
-              checked={selectedParameters.includes(param)}
-              onChange={() => handleParameterChange(param)}
-            />
-            {param}
-          </label>
-        ))}
-      </div>
-      {selectedParameters.length > 0 && (
+    <div className="plot-g">
+    <h3>Real-Time Data Plot</h3>
+    <div className="checkbox">
+      {availableParams.map((param) => (
+        <label key={param} style={{ marginRight: "10px" }}>
+          <input
+            type="checkbox"
+            checked={selectedParameters.includes(param)}
+            onChange={() => handleParameterChange(param)}
+          />
+          {param}
+        </label>
+      ))}
+    </div>
+  
+    {selectedParameters.length > 0 && (
+      <div className="plot-container">
         <Plot
+          className="Plotly"
           data={selectedParameters.map((param) => ({
             x: dataPoints.x,
             y: dataPoints.data[param] || [],
@@ -85,11 +86,13 @@ const RealTimeChart = ({ instrumentId, ws }) => {
             title: "Real-Time Data vs Time",
             xaxis: { title: "Time (s)" },
             yaxis: { title: "Values" },
+            autosize: true, // Makes it responsive
           }}
         />
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+  );  
 };
 
 export default RealTimeChart;
