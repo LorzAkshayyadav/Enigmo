@@ -35,7 +35,7 @@ html, body {
   margin-bottom: 0%;
   height: fit-content;
   align-items: center;
-  height: 6vh;
+  height: 5.2%;
   width: 100vw;
   background: rgb(230, 227, 227);
   position: relative;
@@ -46,7 +46,8 @@ html, body {
 .Button-plot {
   background: linear-gradient(135deg, rgb(1, 1, 1), #6a6b6b);
   padding: 14px 8px;
-  margin-top:4px;
+  margin-top:2px;
+  margin-bottom: 1px;
   font-size: 14px;
   cursor: pointer;
   text-align: center;
@@ -70,7 +71,7 @@ divided in two parts(4:1)***/
 .App {
   display: flex;
   width: 100vw;
-  height: 94vh;
+  height: 94.8%;
 }
 
 
@@ -106,7 +107,7 @@ ratio 10:90 ******/
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 5.85%;
+  height: 5%;
   padding-top: 6px;
   padding-bottom: 5px;
   position: sticky;
@@ -173,7 +174,6 @@ ratio 45:55***/
 .wer > div:last-child > h2 {
   margin: 0;
   padding: 8px;
-  font-variant: small-caps;
   background-color: rgb(230, 227, 227);
   color: black;
 }
@@ -314,7 +314,7 @@ ratio 45:55***/
 /* Dropdown styling */
 .dropdown-menu {
   position: absolute;
-  bottom: 7vh;
+  bottom: 6vh;
   left: 57%;
   transform: translateX(-50%);
   border-radius: 8px;
