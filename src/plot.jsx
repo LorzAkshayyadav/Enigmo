@@ -5,7 +5,8 @@ import "./Plot.css";
 const Plot = () => {
   const [ws, setWs] = useState(null);
   const [activeActuator, setActiveActuator] = useState(null);
-  const [charts, setCharts] = useState([{ id: Date.now() }]); // Render 1 by default
+  const [plots, setPlots] = useState([0]); // One RealTimeChart rendered by default
+  const [plotIdCounter, setPlotIdCounter] = useState(1);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:5000");
@@ -18,12 +19,12 @@ const Plot = () => {
   }, []);
 
   const addPlot = () => {
-    const newChartId = Date.now();
-    setCharts((prev) => [...prev, { id: newChartId }]);
+    setPlots((prev) => [...prev, plotIdCounter]);
+    setPlotIdCounter((prev) => prev + 1);
   };
 
   const removePlot = (id) => {
-    setCharts((prev) => prev.filter((chart) => chart.id !== id));
+    setPlots((prev) => prev.filter((plotId) => plotId !== id));
   };
 
   return (
@@ -41,21 +42,18 @@ const Plot = () => {
             </button>
           ))}
         </div>
-        <button onClick={addPlot} className="add-plot-btn">+ Add Plot</button>
+        <button onClick={addPlot} className="add-plot-btn">Add Plot</button>
       </div>
 
       <div className="plot">
         {ws && (
           <div className="BOX">
-            {charts.map((chart) => (
-              <div key={chart.id} className="chart-wrapper">
-                <button
-                  className="close-btn"
-                  onClick={() => removePlot(chart.id)}
-                >
+            {plots.map((id) => (
+              <div key={id} className="plot-wrapper">
+                <button className="close-btn" onClick={() => removePlot(id)}>
                   &times;
                 </button>
-                <RealTimeChart ws={ws} instrumentId={activeActuator} />
+                <RealTimeChart ws={ws} activeActuator={activeActuator} />
               </div>
             ))}
           </div>
