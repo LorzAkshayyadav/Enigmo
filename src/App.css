@@ -385,6 +385,12 @@ ratio 45:55***/
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(21, 19, 19, 0.3);
 }
+.actuator-details{
+  position: relative;
+}
+.actuator-details p{
+  position: static;
+}
 
 
 

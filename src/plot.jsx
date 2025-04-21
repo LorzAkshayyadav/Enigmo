@@ -1,43 +1,30 @@
 import React, { useEffect, useState } from "react";
 import RealTimeChart from "./RealTimeChart";
 import "./Plot.css";
-const Plot= () => {
+
+const Plot = () => {
   const [ws, setWs] = useState(null);
-  const [activeSection, setActiveSection] = useState(null);
-  const [instrumentId, setInstrumentId] = useState(null);
-  const [instrumentData, setInstrumentData] = useState({}); // Store data for all actuators
+  const [activeActuator, setActiveActuator] = useState(null);
+  const [charts, setCharts] = useState([{ id: Date.now() }]); // Render 1 by default
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:5002");
+    const socket = new WebSocket("ws://localhost:5000");
 
     socket.onopen = () => console.log("Connected to WebSocket server");
     socket.onerror = (error) => console.error("WebSocket error:", error);
     socket.onclose = () => console.log("WebSocket closed");
 
     setWs(socket);
-
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "update" && data.instruments) {
-          setInstrumentData((prevData) => {
-            const newData = { ...prevData };
-            Object.keys(data.instruments).forEach((id) => {
-              newData[id] = data.instruments[id]; // Store all instruments' data
-            });
-            return newData;
-          });
-        }
-      } catch (error) {
-        console.error("WebSocket message parsing error:", error);
-      }
-    };
-
-    return () => {
-      socket.close();
-      console.log("WebSocket connection closed");
-    };
   }, []);
+
+  const addPlot = () => {
+    const newChartId = Date.now();
+    setCharts((prev) => [...prev, { id: newChartId }]);
+  };
+
+  const removePlot = (id) => {
+    setCharts((prev) => prev.filter((chart) => chart.id !== id));
+  };
 
   return (
     <div className="Ui">
@@ -45,28 +32,33 @@ const Plot= () => {
         <h2>Actuators</h2>
         <div className="button-box">
           {[1, 2, 3, 4].map((id) => (
-            <button 
+            <button
               key={id}
-              onClick={() => {
-                setInstrumentId(id);
-                setActiveSection(`Actuator ${id}`);
-              }}
-              className={activeSection === `Actuator ${id}` ? "active" : ""}
+              onClick={() => setActiveActuator(id)}
+              className={activeActuator === id ? "active" : ""}
             >
               Actuator {id}
             </button>
           ))}
         </div>
+        <button onClick={addPlot} className="add-plot-btn">+ Add Plot</button>
       </div>
 
       <div className="plot">
         {ws && (
-          <RealTimeChart
-            key={instrumentId}
-            instrumentId={instrumentId}
-            ws={ws}
-            instrumentData={instrumentData} // Pass stored data
-          />
+          <div className="BOX">
+            {charts.map((chart) => (
+              <div key={chart.id} className="chart-wrapper">
+                <button
+                  className="close-btn"
+                  onClick={() => removePlot(chart.id)}
+                >
+                  &times;
+                </button>
+                <RealTimeChart ws={ws} instrumentId={activeActuator} />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

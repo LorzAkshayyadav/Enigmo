@@ -34,29 +34,32 @@ for (let i = 1; i <= 4; i++) {
     },
   };
 }
+const toRadians = (deg) => (deg * Math.PI) / 180;
 
 // ✅ Update Data Every 10ms and Broadcast to Clients
+let j=-180;
 setInterval(() => {
-  let actualPosition = Math.random() * 100;
-
+   if(j>180){
+      j=-180;
+   }
   for (let i = 1; i <= 4; i++) {
-    Actuators[i].readData["Actual Position"] = actualPosition.toFixed(2);
-    Actuators[i].readData["Actual Velocity"] = actualPosition.toFixed(2);
-    Actuators[i].readData["Joint Angle"] = actualPosition.toFixed(2);
-    Actuators[i].readData["Actual Torque"] = actualPosition.toFixed(2);
-    Instruments["Pinch"]=actualPosition.toFixed(2);
-    Instruments["Pitch"]=actualPosition.toFixed(2);
-    Instruments["Roll"]=actualPosition.toFixed(2);
-    Instruments["Yaw"]=actualPosition.toFixed(2);
+    Actuators[i].readData["Actual Position"] = 100*Math.sin(toRadians(j)).toFixed(2);
+    Actuators[i].readData["Actual Velocity"] = 200*Math.sin(toRadians(j)).toFixed(2);
+    Actuators[i].readData["Joint Angle"] = j;
+    Actuators[i].readData["Actual Torque"] = Math.sin(toRadians(j)).toFixed(2);
+    Instruments["Pinch"]=j;
+    Instruments["Pitch"]=j;
+    Instruments["Roll"]=j;
+    Instruments["Yaw"]=j;
   }
-
+  j+=1;
   const dataToSend = JSON.stringify({ type: "update", Actuators, Instruments });
   wss.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {
       client.send(dataToSend);
     }
   });
-}, 1000);
+}, 90);
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
@@ -95,5 +98,5 @@ wss.on("connection", (ws) => {
   ws.on("close", () => console.log("Client disconnected"));
 });
 
-const PORT = 5002;
+const PORT = 5000;
 server.listen(PORT, () => console.log(`WebSocket server running on port ${PORT}`));

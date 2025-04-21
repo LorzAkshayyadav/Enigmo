@@ -20,7 +20,7 @@ function App() {
     const connectWebSocket = () => {
       if (ws.current) return;
 
-      ws.current = new WebSocket("ws://localhost:5002");
+      ws.current = new WebSocket("ws://localhost:5000");
 
       ws.current.onopen = () => {
         console.log("Connected to WebSocket server");
@@ -49,7 +49,7 @@ function App() {
     String(date.getHours()).padStart(2, '0') + ':' +
     String(date.getMinutes()).padStart(2, '0') + ':' +
     String(date.getSeconds()).padStart(2, '0');
-
+  const x=(parseFloat(actuators?.[1]?.readData?.["Joint Angle"] || 0) * Math.PI) / 180
 
 
   const handleInstrumentSelect = (selectedInstrument) => {
@@ -63,19 +63,18 @@ function App() {
       toast.error(message);
     }
   };
-
   return (
     <>
       <VibrantToaster />
       <div className="Window">
         <div className="App">
           <div className="wer1">
-            <div class="switch-container">
+            <div className="switch-container">
               <input type="checkbox" id="checkbox" />
-              <label for="checkbox" class="switch">
+              <label htmlFor="checkbox" className="switch">
                 Start
                 <svg
-                  class="slider"
+                  className="slider"
                   viewBox="0 0 512 512"
                   height="1em"
                   xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +100,7 @@ function App() {
                   <ambientLight intensity={0.9} />
                   <Background />
                   <Model />
+
                   <OrbitControls enableZoom />
                 </Canvas>
               </div>)}

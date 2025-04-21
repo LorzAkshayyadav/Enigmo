@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import Plot from "react-plotly.js";
 import "./Plot.css";
 
-const RealTimeChart = ({ instrumentId, ws }) => {
-  const [dataPoints, setDataPoints] = useState({ x: [], data: {} });
-  const [selectedParameters, setSelectedParameters] = useState([]);
+const RealTimeChart = ({ ws, activeActuator }) => {
+  const [parameterData, setParameterData] = useState({});
+  const [selectedParameters, setSelectedParameters] = useState({});
   const startTimeRef = useRef(Date.now());
 
   const availableParams = [
@@ -16,83 +16,130 @@ const RealTimeChart = ({ instrumentId, ws }) => {
     "Target Torque",
   ];
 
+  const layoutRef = useRef({
+    title: "Real-Time Data vs Time",
+    xaxis: {
+      title: "Time (s)",
+      autorange: true,
+    },
+    yaxis: { title: "Values" },
+    autosize: true,
+    dragmode: "pan",
+    hovermode: "closest",
+    showlegend: true,
+    scrollZoom: true,
+   
+  });
+
   const handleParameterChange = (param) => {
-    setSelectedParameters((prev) =>
-      prev.includes(param) ? prev.filter((p) => p !== param) : [...prev, param]
-    );
+    if (!activeActuator) return;
+    const actuatorId = activeActuator.toString();
+
+    setSelectedParameters((prev) => {
+      const current = prev[actuatorId] || [];
+      const updated = current.includes(param)
+        ? current.filter((p) => p !== param)
+        : [...current, param];
+      return { ...prev, [actuatorId]: updated };
+    });
   };
 
   useEffect(() => {
-    if (!ws || !instrumentId || selectedParameters.length === 0) return;
+    if (!ws) return;
 
     const handleDataUpdate = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === "update" && data.Actuators?.[instrumentId]) {
-          const elapsedTime = (Date.now() - startTimeRef.current) / 1000;
+        if (data.type === "update" && data.Actuators) {
+          const now = (Date.now() - startTimeRef.current) / 1000;
 
-          setDataPoints((prev) => {
-            const newX = [...prev.x, elapsedTime];
-            const newData = { ...prev.data };
+          setParameterData((prevData) => {
+            const newData = { ...prevData };
 
-            selectedParameters.forEach((param) => {
-              const value =
-                data.Actuators[instrumentId].readData?.[param] ??
-                data.Actuators[instrumentId].writeData?.[param] ??
-                0;
-              newData[param] = [...(newData[param] || []), value];
+            Object.entries(data.Actuators).forEach(([actuatorId, actuator]) => {
+              const selected = selectedParameters[actuatorId] || [];
+              if (!newData[actuatorId]) newData[actuatorId] = {};
+
+              selected.forEach((param) => {
+                const value =
+                  actuator.readData?.[param] ??
+                  actuator.writeData?.[param] ??
+                  0;
+
+                if (!newData[actuatorId][param]) {
+                  newData[actuatorId][param] = [];
+                }
+
+                newData[actuatorId][param].push({ t: now, v: value });
+              });
             });
 
-            return { x: newX, data: newData };
+            return newData;
           });
         }
-      } catch (error) {
-        console.error("WebSocket message parsing error:", error);
+      } catch (err) {
+        console.error("WebSocket parse error:", err);
       }
     };
 
     ws.addEventListener("message", handleDataUpdate);
     return () => ws.removeEventListener("message", handleDataUpdate);
-  }, [ws, instrumentId, selectedParameters]);
+  }, [ws, selectedParameters]);
+
+  // Compute the latest timestamp and update the layout to include 20s buffer
+  const allTimes = Object.values(parameterData)
+    .flatMap((params) => Object.values(params).flatMap((arr) => arr.map((d) => d.t)));
+  const maxTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
+
+  layoutRef.current.xaxis.range = [10, maxTime + 20];
+  layoutRef.current.xaxis.autorange = false;
 
   return (
     <div className="plot-g">
-    <h3>Real-Time Data Plot</h3>
-    <div className="checkbox">
-      {availableParams.map((param) => (
-        <label key={param} style={{ marginRight: "10px" }}>
-          <input
-            type="checkbox"
-            checked={selectedParameters.includes(param)}
-            onChange={() => handleParameterChange(param)}
-          />
-          {param}
-        </label>
-      ))}
-    </div>
-  
-    {selectedParameters.length > 0 && (
+      <h3>Real-Time Data Plot</h3>
+
+      {activeActuator && (
+        <div className="checkbox">
+          <div style={{ marginTop: "5px" }}>
+            {availableParams.map((param) => (
+              <label key={param} style={{ marginRight: "10px" }}>
+                <input
+                  type="checkbox"
+                  checked={
+                    selectedParameters[activeActuator]?.includes(param) || false
+                  }
+                  onChange={() => handleParameterChange(param)}
+                />
+                {param}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="plot-container">
         <Plot
-          className="Plotly"
-          data={selectedParameters.map((param) => ({
-            x: dataPoints.x,
-            y: dataPoints.data[param] || [],
-            type: "scatter",
-            mode: "lines",
-            name: param,
-          }))}
-          layout={{
-            title: "Real-Time Data vs Time",
-            xaxis: { title: "Time (s)" },
-            yaxis: { title: "Values" },
-            autosize: true, // Makes it responsive
+          data={Object.entries(parameterData).flatMap(([actuatorId, params]) =>
+            Object.entries(params).map(([param, values]) => ({
+              x: values.map((d) => d.t),
+              y: values.map((d) => d.v),
+              type: "scatter",
+              mode: "lines",
+              name: `Actuator ${actuatorId} - ${param}`,
+            }))
+          )}
+          layout={layoutRef.current}
+          useResizeHandler
+          style={{ width: "100%", height: "500px", margin: "auto" }}
+          config={{
+            staticPlot: false,
+            scrollZoom: true,
+            displayModeBar: true,
           }}
         />
       </div>
-    )}
-  </div>
-  );  
+    </div>
+  );
 };
 
 export default RealTimeChart;

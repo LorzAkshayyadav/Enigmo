@@ -6,7 +6,7 @@ function DataVisualizer() {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket("ws://localhost:5002");
+    ws.current = new WebSocket("ws://localhost:5000");
 
     ws.current.onopen = () => {
       console.log("Connected to WebSocket Server");
@@ -28,7 +28,6 @@ function DataVisualizer() {
         ws.current = new WebSocket("ws://localhost:5002");
       }, 3000);
     };
-
   }, []);
 
   const handleChange = (param, newValue) => {
@@ -42,21 +41,33 @@ function DataVisualizer() {
     }
   };
 
+  const minLimit = -160;
+  const maxLimit = 160;
+
+  const isOutOfRange = (value) => value < minLimit || value > maxLimit;
+
   return (
     <>
       <h2>Instrument Controls</h2>
       <div className="container">
         {Object.entries(values).map(([key, value]) => (
           <div key={key} className="demo">
-              <div className="range-slider">
-                <span className="range-label">
+            <div className="range-slider">
+              <span className="range-label">
                 <span>{key}</span>
-                  <span><input type="range" value={value} min="-180" max="180" range="true"
-                  onChange={(e) => handleChange(key, Number(e.target.value))}/></span>
-                  <span className="range-value">{value}°</span>
-                  </span>
-                  
-              </div>
+                <span>
+                  <input
+                    type="range"
+                    value={value}
+                    min="-180"
+                    max="180"
+                    className={isOutOfRange(value) ? "out-of-range" : ""}
+                    onChange={(e) => handleChange(key, Number(e.target.value))}
+                  />
+                </span>
+                <span className="range-value">{value}°</span>
+              </span>
+            </div>
           </div>
         ))}
       </div>

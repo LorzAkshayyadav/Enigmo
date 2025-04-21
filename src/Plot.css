@@ -51,6 +51,7 @@
 .plot {
   height: 100vh;
   width: 80%;
+  overflow: scroll;
   font-size: small;
   border-left: 2px solid rgb(129, 152, 158);
 }
@@ -131,3 +132,39 @@
     height: 400px; /* Adjust for smaller screens */
   }
 }
+/* Disable pinch-to-zoom on the body */
+body {
+  touch-action: none;
+}
+/* Optional: Style adjustments for plot's mode bar */
+.plot-container .modebar {
+  z-index: 999; /* Ensure it's above the plot */
+}
+.add-plot-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #353536;
+  color: white;
+  border: solid 1px #000000;
+  text-align: center;
+  margin-left: 35%;
+}
+
+.chart-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
