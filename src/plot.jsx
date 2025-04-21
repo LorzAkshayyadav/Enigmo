@@ -2,13 +2,21 @@ import React, { useEffect, useState } from "react";
 import RealTimeChart from "./RealTimeChart";
 import "./Plot.css";
 
-const Plot = () => {
+const Plot = ({ start }) => {
   const [ws, setWs] = useState(null);
   const [activeActuator, setActiveActuator] = useState(null);
-  const [plots, setPlots] = useState([0]); // One RealTimeChart rendered by default
+  const [plots, setPlots] = useState([0]);
   const [plotIdCounter, setPlotIdCounter] = useState(1);
 
   useEffect(() => {
+    if (!start) {
+      if (ws) {
+        ws.close();
+        setWs(null);
+      }
+      return;
+    }
+
     const socket = new WebSocket("ws://localhost:5000");
 
     socket.onopen = () => console.log("Connected to WebSocket server");
@@ -16,7 +24,9 @@ const Plot = () => {
     socket.onclose = () => console.log("WebSocket closed");
 
     setWs(socket);
-  }, []);
+
+  
+  }, [start]);
 
   const addPlot = () => {
     setPlots((prev) => [...prev, plotIdCounter]);
@@ -46,18 +56,16 @@ const Plot = () => {
       </div>
 
       <div className="plot">
-        {ws && (
-          <div className="BOX">
-            {plots.map((id) => (
-              <div key={id} className="plot-wrapper">
-                <button className="close-btn" onClick={() => removePlot(id)}>
-                  &times;
-                </button>
-                <RealTimeChart ws={ws} activeActuator={activeActuator} />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="BOX">
+          {plots.map((id) => (
+            <div key={id} className="plot-wrapper">
+              <button className="close-btn" onClick={() => removePlot(id)}>
+                &times;
+              </button>
+              <RealTimeChart ws={ws} activeActuator={activeActuator} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

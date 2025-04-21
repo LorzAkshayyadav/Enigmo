@@ -12,49 +12,26 @@ import Background from "./Scene";
 import Plot from "./plot";
 function App() {
   const [instruments, setInstruments] = useState(["Scissor", "Grasper", "Holder", "Dissector", "Teneculum"]);
-  const [actuators, setActuators] = useState([]);
+  const [selectedInstrument, setSelectedInstrument] = useState(null);
   const ws = useRef(null);
   const [activeSection, setActiveSection] = useState(null);
+  const [mode, setMode] = useState(null);
+  const [start, setStart] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const connectWebSocket = () => {
-      if (ws.current) return;
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-      ws.current = new WebSocket("ws://localhost:5000");
-
-      ws.current.onopen = () => {
-        console.log("Connected to WebSocket server");
-      };
-
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("WebSocket Data Received:", data);
-
-        if (data.type === "initialData" || data.type === "update") {
-          setActuators(Object.values(data.Actuators || {}));
-        }
-      };
-
-      ws.current.onclose = () => {
-        console.log("WebSocket Disconnected. Reconnecting...");
-        setTimeout(connectWebSocket, 3000);
-      };
-    };
-
-    connectWebSocket();
+    return () => clearInterval(interval); // cleanup
   }, []);
-  //Time
-  const date = new Date();
+
   const showTime =
-    String(date.getHours()).padStart(2, '0') + ':' +
-    String(date.getMinutes()).padStart(2, '0') + ':' +
-    String(date.getSeconds()).padStart(2, '0');
-  const x=(parseFloat(actuators?.[1]?.readData?.["Joint Angle"] || 0) * Math.PI) / 180
+    String(currentTime.getHours()).padStart(2, '0') + ':' +
+    String(currentTime.getMinutes()).padStart(2, '0') + ':' +
+    String(currentTime.getSeconds()).padStart(2, '0');
 
-
-  const handleInstrumentSelect = (selectedInstrument) => {
-    console.log(`Selected Instrument: ${selectedInstrument}`);
-  };
 
   const showToast = (message, type) => {
     if (type === "success") {
@@ -71,7 +48,14 @@ function App() {
           <div className="wer1">
             <div className="switch-container">
               <input type="checkbox" id="checkbox" />
-              <label htmlFor="checkbox" className="switch">
+              <label htmlFor="checkbox" className="switch" onClick={() => {
+                setStart(!start);
+                if (!start) {
+                  showToast("Simulation Started", "success");
+                } else {
+                  showToast("Simulation Stopped", "error");
+                }
+              }}>
                 Start
                 <svg
                   className="slider"
@@ -92,7 +76,7 @@ function App() {
               </span>
             </div>
             {activeSection === "plotData" && (
-              <Plot />
+              <Plot start={start} />
             )}
             {activeSection !== "plotData" && (
               <div>
@@ -107,14 +91,29 @@ function App() {
           </div>
 
           <div className="wer">
-            <div><ActuatorList actuators={actuators} /></div>
-            <div><DataVisualizer /></div>
+            <div><ActuatorList start={start} /></div>
+            <div><DataVisualizer start={start} /></div>
           </div>
         </div>
         <div className="Tool-Bar">
-          <button className="Button" onClick={() => showToast("Simulation Mode Activated", "success")}>Simulation Mode</button>
-          <button className="Button" onClick={() => showToast("Hardware Mode Activated", "success")}>Hardware Mode</button>
-          <InstrumentSelector instruments={instruments} onSelect={handleInstrumentSelect} />
+          <span className="simulation">
+            <button
+              className="Button"
+              onClick={() => {
+                showToast("Simulation Mode Activated", "success");
+                setMode("simulation");
+              }}
+            >
+              Simulation Mode
+            </button>
+            {mode === "simulation" && (<div class="beep"></div>)}
+          </span>
+          <span className="simulation">
+            <button className="Button" onClick={() => { showToast("Hardware Mode Activated", "success"); setMode("hardware"); }}>Hardware Mode</button>
+            {mode === "hardware" && (<div class="beep"></div>)}
+          </span>
+          <InstrumentSelector instruments={instruments} selectedInstrument={selectedInstrument}
+            onSelect={setSelectedInstrument} />
           <button
             className="Button-plot"
             onClick={() => setActiveSection(prev => prev === "plotData" ? "robot" : "plotData")}

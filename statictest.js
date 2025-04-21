@@ -24,13 +24,13 @@ for (let i = 1; i <= 4; i++) {
       "Actual Position": i,
       "Actual Velocity": i,
       "Joint Angle": i,
-      "Actual Torque": i,
+      "Actual Current": i,
     },
     writeData: {
       "Target Position": 150 + i,
       "Target Velocity": 60 + i,
       "Control Word": 80 + i,
-      "Target Torque": 40 + i,
+      "Target Current": 40 + i,
     },
   };
 }
@@ -46,7 +46,7 @@ setInterval(() => {
     Actuators[i].readData["Actual Position"] = 100*Math.sin(toRadians(j)).toFixed(2);
     Actuators[i].readData["Actual Velocity"] = 200*Math.sin(toRadians(j)).toFixed(2);
     Actuators[i].readData["Joint Angle"] = j;
-    Actuators[i].readData["Actual Torque"] = Math.sin(toRadians(j)).toFixed(2);
+    Actuators[i].readData["Actual Current"] = 300*Math.sin(toRadians(j)).toFixed(2);
     Instruments["Pinch"]=j;
     Instruments["Pitch"]=j;
     Instruments["Roll"]=j;

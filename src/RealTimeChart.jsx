@@ -6,14 +6,15 @@ const RealTimeChart = ({ ws, activeActuator }) => {
   const [parameterData, setParameterData] = useState({});
   const [selectedParameters, setSelectedParameters] = useState({});
   const startTimeRef = useRef(Date.now());
+  const [userPanned, setUserPanned] = useState(false); // Track if user panned
 
   const availableParams = [
     "Actual Position",
     "Actual Velocity",
-    "Actual Torque",
+    "Actual Current",
     "Target Position",
+    "Target Current",
     "Target Velocity",
-    "Target Torque",
   ];
 
   const layoutRef = useRef({
@@ -28,7 +29,6 @@ const RealTimeChart = ({ ws, activeActuator }) => {
     hovermode: "closest",
     showlegend: true,
     scrollZoom: true,
-   
   });
 
   const handleParameterChange = (param) => {
@@ -86,13 +86,28 @@ const RealTimeChart = ({ ws, activeActuator }) => {
     return () => ws.removeEventListener("message", handleDataUpdate);
   }, [ws, selectedParameters]);
 
-  // Compute the latest timestamp and update the layout to include 20s buffer
-  const allTimes = Object.values(parameterData)
-    .flatMap((params) => Object.values(params).flatMap((arr) => arr.map((d) => d.t)));
-  const maxTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
+  // Adjust x-axis only if user hasn't panned
+  useEffect(() => {
+    if (!userPanned) {
+      const allTimes = Object.values(parameterData)
+        .flatMap((params) =>
+          Object.values(params).flatMap((arr) => arr.map((d) => d.t))
+        );
+      const maxTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
 
-  layoutRef.current.xaxis.range = [10, maxTime + 20];
-  layoutRef.current.xaxis.autorange = false;
+      layoutRef.current.xaxis.range = [10, maxTime + 20];
+      layoutRef.current.xaxis.autorange = false;
+    }
+  }, [parameterData, userPanned]);
+
+  const handleRelayout = (event) => {
+    if (event["xaxis.range[0]"] !== undefined && event["xaxis.range[1]"] !== undefined) {
+      setUserPanned(true); // User panned manually
+    }
+    if (event["xaxis.autorange"]) {
+      setUserPanned(false); // User hit Autoscale
+    }
+  };
 
   return (
     <div className="plot-g">
@@ -135,7 +150,10 @@ const RealTimeChart = ({ ws, activeActuator }) => {
             staticPlot: false,
             scrollZoom: true,
             displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: [],
           }}
+          onRelayout={handleRelayout}
         />
       </div>
     </div>

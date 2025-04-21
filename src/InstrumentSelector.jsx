@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
-const InstrumentSelector = ({ instruments, onSelect }) => {
+import toast from "react-hot-toast";
+
+const InstrumentSelector = ({ instruments, selectedInstrument, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -18,7 +20,7 @@ const InstrumentSelector = ({ instruments, onSelect }) => {
   return (
     <div className="relative" ref={dropdownRef}>
       <button className="Button menu-bar" onClick={() => setIsOpen(!isOpen)}>
-        Instrument Type ▼
+        {selectedInstrument || "Instrument Type"} ▼
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -36,6 +38,7 @@ const InstrumentSelector = ({ instruments, onSelect }) => {
                 onClick={() => {
                   onSelect(instrument);
                   setIsOpen(false);
+                 selectedInstrument===instrument?toast.error("Already Selected"):toast.success(`${instrument} Selected`)
                 }}
               >
                 {instrument}

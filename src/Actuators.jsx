@@ -1,9 +1,47 @@
-import { useState } from "react";
+import { useState,useRef,useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 import "./App.css";
-const ActuatorList = ({ actuators }) => {
+const ActuatorList = ({start}) => {
+  const [actuators, setActuators] = useState([]);
+  const ws = useRef(null);
+  useEffect(() => {
+    if (!start) {
+      
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
+      return;
+    }
+  
+    const socket = new WebSocket("ws://localhost:5000");
+    ws.current = socket;
+  
+    socket.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+  
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("WebSocket Data Received:", data);
+  
+      if (data.type === "initialData" || data.type === "update") {
+        setActuators(Object.values(data.Actuators || {}));
+      }
+    };
+  
+    socket.onclose = () => {
+      console.log("WebSocket Disconnected.");
+    };
+  
+    return () => {
+      socket.close();
+      ws.current = null;
+    };
+  }, [start]);
+  
   const [expandedActuators, setExpandedActuators] = useState({});
 
   const toggleActuator = (id) => {

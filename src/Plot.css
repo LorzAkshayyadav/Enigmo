@@ -41,7 +41,7 @@
 }
 
 .button-box button:hover {
-  background: linear-gradient(135deg, rgb(90, 89, 89), #787a7a);
+  background: linear-gradient(90deg, rgb(127, 126, 126), #f2f4f4);
   color: white;
   z-index: 1;
   box-shadow: #000 0px 0px 20px;
@@ -145,14 +145,18 @@ body {
   padding: 6px 12px;
   font-size: 14px;
   cursor: pointer;
-  background-color: #353536;
-  color: white;
-  border: solid 1px #000000;
+  color: rgb(6, 6, 6);
+  border: solid 1px #f9f9f9;
   text-align: center;
   margin-left: 35%;
 }
+.add-plot-btn:hover {
+  z-index: 100;
+  background: linear-gradient(135deg, rgb(179, 177, 177), #f2f4f4);
+  cursor: pointer;
+}
 
-.chart-wrapper {
+.plot-wrapper {
   position: relative;
   margin-bottom: 20px;
 }

@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
-function DataVisualizer() {
+function DataVisualizer({start}) {
   const [values, setValues] = useState({ Pitch: 0, Yaw: 0, Roll: 0, Pinch: 0 });
   const ws = useRef(null);
 
   useEffect(() => {
+    if (!start) return;
+  
     ws.current = new WebSocket("ws://localhost:5000");
-
+  
     ws.current.onopen = () => {
       console.log("Connected to WebSocket Server");
     };
-
+  
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "update" && data.Instruments) {
@@ -21,14 +23,19 @@ function DataVisualizer() {
         }));
       }
     };
-
+  
     ws.current.onclose = () => {
-      console.log("WebSocket Disconnected. Reconnecting...");
-      setTimeout(() => {
-        ws.current = new WebSocket("ws://localhost:5002");
-      }, 3000);
+      console.log("WebSocket Disconnected.");
     };
-  }, []);
+  
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
+    };
+  }, [start]);
+  
 
   const handleChange = (param, newValue) => {
     const updatedValues = { ...values, [param]: newValue };
